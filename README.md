@@ -126,3 +126,7 @@ More: [security](docs/security.md).
 ## Documentation
 
 Everything else is in [docs/](docs/INDEX.md).
+
+## License
+
+[MIT](LICENSE).
