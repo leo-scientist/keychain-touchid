@@ -1,0 +1,16 @@
+# Settings for keychain-touchid, read from /usr/local/etc/keychain-touchid.conf.
+#
+# The file must be owned by root and not writable by group or others; otherwise
+# keychain-touchid refuses to run. A missing file or a commented-out line means
+# the default shown.
+
+# How long, in seconds, a successful authentication is reused for further reads
+# of the same secret by anything started from the same terminal session (tab).
+# 0 asks on every read.
+# Maximum 86400 (one day).
+#cache_seconds = 0
+
+# What counts as authentication:
+#   any       Touch ID, Apple Watch or the Mac password
+#   biometry  Touch ID only
+#policy = any
