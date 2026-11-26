@@ -43,7 +43,12 @@ struct Commands {
             return
         }
 
-        try await authenticator.authenticate(reason: PromptText.reason(for: item, requester: requester))
+        let reason = PromptText.reason(
+            for: item,
+            requester: requester,
+            reuseSeconds: cache.isActive ? cache.window : nil
+        )
+        try await authenticator.authenticate(reason: reason)
         let secret = try store.read(item)
         try emit(secret)
 

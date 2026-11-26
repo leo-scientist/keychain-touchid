@@ -20,7 +20,7 @@ private final class Harness {
         Commands(
             store: store,
             authenticator: authenticator,
-            requester: Requester(name: "zsh", pid: 4242),
+            requester: Requester(name: "zsh", origin: .application("Terminal")),
             readSecret: { [self] _ in
                 secretRequests += 1
 
@@ -48,7 +48,7 @@ private final class Harness {
         try await harness.commands().run(.get(item, useCache: true))
 
         #expect(harness.written == [[0x00, 0xFF, 0x0A]])
-        #expect(harness.authenticator.reasons == ["read the secret “op-token” (sam), requested by zsh (pid 4242)"])
+        #expect(harness.authenticator.reasons == ["give the secret “op-token” (sam) to zsh, running in Terminal"])
     }
 
     @Test func getAppendsNewlineOnlyForATerminal() async throws {
@@ -182,6 +182,18 @@ private final class Harness {
         #expect(harness.authenticator.reasons.count == 1)
         #expect(harness.written == [bytes("token"), bytes("token")])
         #expect(harness.notes == ["authentication reused from 30 s ago"])
+    }
+
+    @Test func promptSaysWhenTheAuthenticationWillBeReused() async throws {
+        harness.store.secrets[item] = bytes("token")
+
+        try await harness.commands(window: 300).run(.get(item, useCache: true))
+        try await harness.commands(window: 300, session: nil).run(.get(item, useCache: true))
+        try await harness.commands(window: 0).run(.get(item, useCache: false))
+
+        let reuseNotice = "let this terminal read it again for 5 minutes"
+
+        #expect(harness.authenticator.reasons.map { $0.contains(reuseNotice) } == [true, false, false])
     }
 
     @Test func readAfterTheWindowAuthenticatesAgain() async throws {

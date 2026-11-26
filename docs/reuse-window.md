@@ -11,7 +11,9 @@ further reads of **the same secret** from **the same terminal session** within
 that many seconds do not ask again.
 
 The cost is stated plainly: within the window, any process that belongs to that
-terminal session gets the secret without a prompt.
+terminal session gets the secret without a prompt. The authentication dialog
+says so whenever approving will open a window
+([authentication.md](authentication.md#wording)).
 
 ## Session scope
 
@@ -27,7 +29,8 @@ anything the caller controls:
 
 `sysctl(KERN_PROC_PID)` is used rather than `proc_pidinfo`, because the leader of
 a terminal session is usually the `login` process owned by root, and
-`proc_pidinfo` refuses to describe another user's process.
+`proc_pidinfo` refuses to describe another user's process. The lookup is shared
+with the code that finds the requesting process (`ProcessAncestry.swift`).
 
 What is inside and outside a session:
 

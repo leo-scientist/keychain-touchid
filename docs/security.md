@@ -23,7 +23,7 @@ Keychain. So the protection is a chain, and each link has its own defence:
 | The binary authenticates first | The binary is made to skip the check | No option, environment variable or user-writable file can skip it; [settings](settings.md) come only from a root-owned file |
 | The binary runs unmodified | Code is injected, or a debugger reads the secret from memory | Signed with the hardened runtime (`codesign --options runtime`): `DYLD_INSERT_LIBRARIES` is ignored and attaching a debugger is refused |
 | The binary on disk is the real one | The file is replaced | Installed in `/usr/local/bin`, owned by root. A replaced binary also has a different signature, so the Keychain would not trust it |
-| The user approves a known request | A prompt is disguised or unexpected | The dialog names the item and the requesting process; names cannot contain characters that disguise text ([authentication.md](authentication.md)) |
+| The user approves a known request | A prompt is disguised or unexpected | The dialog names the item, what asked for it and where that was started, and says when the approval will be reused; names cannot contain characters that disguise text ([authentication.md](authentication.md)) |
 
 Further measures:
 
@@ -41,8 +41,9 @@ Further measures:
 - **It does not protect against deletion or replacement.** Any process running
   as the user can delete a Keychain item or overwrite its value without a
   password. Only reading is protected.
-- **It cannot vouch for the requester.** The process name in the dialog is the
-  name of the parent's executable, which that process chooses.
+- **It cannot vouch for the requester.** The names in the dialog come from the
+  requesting process and its ancestors, which choose their own names and
+  arguments.
 - **It does not work unattended.** The prompt is shown on the Mac's screen.
 - **With the reuse window on**, any process in the same terminal session gets
   the secret without a prompt until the window ends.

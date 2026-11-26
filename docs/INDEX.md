@@ -37,7 +37,8 @@
 | `ExitCode.swift` | Exit codes and the message for every error | [commands.md](commands.md#exit-codes) |
 | `KeychainStore.swift` | Keychain items: add, update, read, delete, list, own or foreign | [keychain.md](keychain.md) |
 | `Authenticator.swift` | The authentication prompt and the policy behind it | [authentication.md](authentication.md) |
-| `Requester.swift` | The requesting process, text safe to display, the prompt wording | [authentication.md](authentication.md) |
+| `Requester.swift` | What asked and where it was started, text safe to display, the prompt wording | [authentication.md](authentication.md#the-requesting-process) |
+| `ProcessAncestry.swift` | Reads a process, its arguments and its ancestors from the kernel | [authentication.md](authentication.md#how-the-processes-are-read) |
 | `AuthCache.swift` | The remembered authentication | [reuse-window.md](reuse-window.md) |
 | `SessionScope.swift` | Which terminal session a process belongs to | [reuse-window.md](reuse-window.md#session-scope) |
 | `Settings.swift` | Loads and checks the settings file | [settings.md](settings.md) |

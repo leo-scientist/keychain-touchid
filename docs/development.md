@@ -75,8 +75,8 @@ do not cover any of this.
 | # | Action | Expected |
 | --- | --- | --- |
 | A1 | `printf 'value-1' \| keychain-touchid set kt-accept "$USER"` | Exit 0; Keychain Access shows the kind `keychain-touchid secret` |
-| A2 | `keychain-touchid get kt-accept "$USER"`, twice | A dialog each time, naming the item and the process; prints `value-1` |
-| A3 | The same, then Cancel | Exit 3, nothing on stdout |
+| A2 | `keychain-touchid get kt-accept "$USER"`, twice | A dialog each time, naming the item, the requester and the application; prints `value-1` |
+| A3 | The same, then Deny | Exit 3, nothing on stdout |
 | A4 | In the dialog choose the password instead of Touch ID | Works with the Mac password |
 | A5 | `security find-generic-password -s kt-accept -a "$USER" -w` | The macOS password prompt; press Deny; no value |
 | A6 | `DYLD_INSERT_LIBRARIES=<a test dylib> keychain-touchid get …`; `lldb -p <pid>` | The dylib is not loaded; the debugger cannot attach |
@@ -87,6 +87,7 @@ do not cover any of this.
 | A11 | `security add-generic-password -s kt-foreign -a "$USER" -w x`, then `set`, `get`, `list` on it | `set` refuses with a hint, `get` exits 4, `list` does not show it |
 | A12 | `keychain-touchid list` | Shows `kt-accept`; no dialog |
 | A13 | `keychain-touchid delete kt-accept "$USER"`, then `get` | Exit 0, then exit 4 without a dialog |
+| A14 | `get` from a script, from an editor's terminal, and from inside `tmux` | The dialog shows the script's name, `running in` the editor, `started by tmux` |
 
 Afterwards remove `kt-foreign` with `security delete-generic-password`.
 
@@ -95,7 +96,7 @@ Afterwards remove `kt-foreign` with `security delete-generic-password`.
 | # | Action | Expected |
 | --- | --- | --- |
 | B1 | No settings file; `get` twice | A dialog each time |
-| B2 | `cache_seconds = 60`; `get` twice in one tab | No dialog the second time; a line on stderr about the reuse |
+| B2 | `cache_seconds = 60`; `get` twice in one tab | The dialog says the terminal may read again for 1 minute; no dialog the second time; a line on stderr about the reuse |
 | B3 | Straight away, `get` in another tab | A dialog |
 | B4 | `get` after more than 60 seconds | A dialog |
 | B5 | `set` a new value, then `get` within the window | A dialog |
@@ -110,7 +111,7 @@ Afterwards remove `kt-foreign` with `security delete-generic-password`.
 These rest on documented macOS behaviour and have not been observed with this
 tool:
 
-- the exact sentence the authentication dialog shows around the reason text;
+- the names shown for requests from editors, `tmux` and launch agents (A14);
 - behaviour in a remote (SSH) session;
 - the hidden prompt refusing an entry that fills the terminal line;
 - "Always Allow" adding a rebuilt binary to an item's trust list (A10);

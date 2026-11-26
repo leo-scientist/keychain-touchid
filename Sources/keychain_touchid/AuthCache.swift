@@ -21,6 +21,11 @@ struct AuthCache {
     let session: SessionScope?
     let now: () -> Date
 
+    /// Whether an authentication given now will be remembered.
+    var isActive: Bool {
+        window > 0 && session != nil
+    }
+
     /// The record for `item` if it is recent enough and belongs to this session. The caller still has to
     /// check that it `covers` the current secret.
     func freshRecord(for item: ItemID) -> CacheRecord? {

@@ -24,7 +24,10 @@ struct SessionScope: Codable, Equatable {
     static func current() -> SessionScope? {
         let sessionID = getsid(0)
 
-        guard sessionID > 0, let own = processInfo(of: getpid()), let leader = processInfo(of: sessionID) else {
+        guard sessionID > 0,
+              let own = ProcessAncestry.info(of: getpid()),
+              let leader = ProcessAncestry.info(of: sessionID)
+        else {
             return nil
         }
 
@@ -33,20 +36,5 @@ struct SessionScope: Codable, Equatable {
             leaderStartedAt: UInt64(clamping: leader.kp_proc.p_starttime.tv_sec),
             terminal: UInt32(bitPattern: own.kp_eproc.e_tdev)
         )
-    }
-
-    /// Uses `sysctl` because the leader of a terminal session is usually root's `login`, and `proc_pidinfo`
-    /// refuses to describe another user's process.
-    static func processInfo(of pid: pid_t) -> kinfo_proc? {
-        var name = [CTL_KERN, KERN_PROC, KERN_PROC_PID, pid]
-        var info = kinfo_proc()
-        var size = MemoryLayout<kinfo_proc>.size
-
-        // A process that does not exist is reported as success with nothing written.
-        guard sysctl(&name, UInt32(name.count), &info, &size, nil, 0) == 0, size > 0 else {
-            return nil
-        }
-
-        return info
     }
 }
