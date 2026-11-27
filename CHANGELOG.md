@@ -9,6 +9,7 @@ versions follow [Semantic Versioning](https://semver.org/). `keytap --version` p
 
 - OpenSSF Scorecard: a weekly supply-chain check with its results behind a badge in the README.
 - CodeQL analysis of the Swift code and the workflows.
+- OpenSSF Best Practices badge (passing level) in the README.
 
 ### Changed
 
