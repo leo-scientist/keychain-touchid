@@ -17,8 +17,19 @@ Include:
 - the steps that show the problem;
 - what someone gains by it: a secret read without Touch ID, a disguised prompt, a weakened setting.
 
-The report stays private while it is fixed. The vulnerability is disclosed in a GitHub security advisory once a
-release with the fix is out, crediting you unless you prefer otherwise.
+## What happens to a report
+
+1. **Acknowledgement** within 14 days, in the advisory.
+2. **Assessment.** The maintainer reproduces the problem and says whether it is a vulnerability and how severe it
+   is. If it is not one, the advisory says why and is closed.
+3. **Fix**, prepared in the advisory's private fork, with a test that fails without it. You are invited to check
+   it.
+4. **Release** with the fix, then **disclosure**: the advisory is published, with a CVE requested from GitHub, and
+   the release notes point to it.
+5. **Credit**: the advisory and the release notes name you as the reporter, unless you prefer otherwise.
+
+The report stays private until step 4. If a fix takes longer than 90 days, the maintainer tells you why and agrees
+a date with you.
 
 ## Scope
 

@@ -21,3 +21,11 @@ jobs:
       - run: make lint
       - run: make test
       - run: make smoke
+      - name: Staged install (DESTDIR)
+        run: |
+          stage="$(mktemp -d)"
+          make install DESTDIR="$stage"
+          test -x "$stage/usr/local/bin/keytap"
+          test -f "$stage/usr/local/etc/keytap.conf.sample"
+          test -f "$stage/usr/local/share/zsh/site-functions/_keytap"
+          codesign --verify --strict "$stage/usr/local/bin/keytap"

@@ -69,6 +69,62 @@ Never answer **Always Allow** for any other program, including a development
 build (`swift build`, `swift run`): it has no hardened runtime, and it would be
 added to the item's trust list permanently.
 
+## Assurance case
+
+Why the protection described above can be relied on.
+
+**Claim.** A process running as the user, but not as root, cannot read the
+value of a secret stored with the tool unless the user approves the read in a
+prompt that names it, or types the Mac password.
+
+**Trust boundaries.**
+
+| Trusted | Not trusted |
+| --- | --- |
+| The kernel, the Keychain and LocalAuthentication | Every other process running as the user, and what it controls: arguments, environment, `$HOME`, the terminal, process names |
+| root, and the files only root can change: the installed binary, its successor path, the settings file | Anything the user can write, including the build directory and a development build |
+| The installed binary while it runs, protected by the hardened runtime | Data read back from the Keychain: any process can create items or change their values |
+
+**Argument.** The claim holds if every link of [the chain](#the-chain) holds.
+The first table there names the defence of each link, and the second covers the
+ways around the chain found so far. What lies outside the claim is listed under
+[what it does not do](#what-it-does-not-do).
+
+**Secure design principles applied.**
+
+| Principle | Where |
+| --- | --- |
+| Least privilege | The tool runs as the user, never as root; `sudo` is used only by `make` to install. An item trusts one binary |
+| Fail-safe defaults | Every read asks; the reuse window is off unless root turns it on; a settings problem is an error, never a fallback |
+| Complete mediation | Every `get` authenticates; a reused approval is checked against the secret's hash and the terminal session each time |
+| Economy of mechanism | One executable, no dependencies, no network, no daemon; standard macOS facilities only |
+| Open design | All sources and this documentation are public; nothing relies on being secret except the secrets |
+| Separation of privilege | Reading needs both the trusted binary and the user's approval; replacing the binary needs root |
+| Least common mechanism | Items of other programs are never read or written; the tool works only on items carrying its own marker |
+| Psychological acceptability | One Touch ID prompt that says who asks for what; no setup needed |
+
+**Common weaknesses countered.**
+
+| Weakness | Counter |
+| --- | --- |
+| Improper input validation (CWE-20) | Names are checked against strict rules ([commands.md](commands.md#names)); a secret has a length limit ([commands.md](commands.md#entering-a-secret)) |
+| Output that misleads the user (CWE-451) | Text shown in the dialog or terminal is sanitized ([authentication.md](authentication.md#text-safe-to-display)) |
+| Untrusted search path (CWE-426) | Fixed absolute paths for the login keychain, the settings file and the successor; no use of `PATH`, `$HOME` or the search list |
+| Time-of-check to time-of-use race (CWE-367) | A secret is written only by creating an item, never into an existing one ([keychain.md](keychain.md#writing-a-secret)) |
+| Insecure permissions on configuration (CWE-732) | The settings file and the successor are used only when root alone can change them |
+| Code injection into the process (CWE-94) | Hardened runtime: no injected libraries, no debugger |
+| Use of weak cryptography (CWE-327) | No cryptography of its own: the Keychain encrypts, SHA-256 from CryptoKit fingerprints a secret for the reuse window |
+
+**Evidence.**
+
+- Unit tests prove the flow properties over fakes, and the Keychain code against
+  a throwaway keychain ([development.md](development.md#how-the-code-is-tested)).
+- The [acceptance checklist](development.md#acceptance-checklist) covers what
+  tests cannot reach: the dialog, other programs' access, installation, updates.
+- CI runs lint, the tests and a smoke test of the binary on every change;
+  CodeQL analyses the code and the workflows.
+- The rules below keep the argument true as the code changes.
+
 ## Rules for changing the code
 
 - Nothing may let a caller weaken or skip authentication: no option, no

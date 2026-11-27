@@ -15,11 +15,36 @@ as Homebrew would put it under a prefix that you can write to
 the binary that holds the Keychain's trust. That defeats what the tool is for
 ([security.md](security.md)).
 
+## Checking the sources
+
+Release tags after `0.1.0` are signed with the maintainer's GPG key, whose
+fingerprint is:
+
+```
+FFB5 291C F893 FBA2 803E  6684 5B34 EBF0 8039 2366
+```
+
+To check a release before building it, import the key from GitHub, make sure
+its fingerprint is the one above, and verify the tag:
+
+```sh
+curl -fsSL https://github.com/leo-scientist.gpg | gpg --import
+gpg --fingerprint 5B34EBF080392366
+git verify-tag 0.2.0
+git switch --detach 0.2.0
+```
+
+`git verify-tag` must say `Good signature`. GPG may add that the key is not
+certified with a trusted signature; that only means you have not signed the key
+yourself. A missing or bad signature means the sources are not the ones
+released: do not build them.
+
 ## Commands
 
 | Command | What it does |
 | --- | --- |
 | `make install` | Builds, signs, installs, then runs `make verify` |
+| `make install DESTDIR=<dir>` | Builds, signs, and copies the files under `<dir>` for a package ([staging](#staging-for-a-package)) |
 | `make update` | The same; use it after changing the sources. It never fetches sources itself |
 | `make verify` | Checks an installation |
 | `make uninstall` | Removes the binary, the settings file and the zsh completion |
@@ -48,6 +73,29 @@ the binary that holds the Keychain's trust. That defeats what the tool is for
 
 The paths are fixed. The location must be owned by root, and the settings path
 is built into the binary.
+
+## Staging for a package
+
+For building a package, `make install DESTDIR=<dir>` (or `DESTDIR` set in the
+environment) builds and signs as usual, then only copies the files under
+`<dir>`:
+
+| File | Mode |
+| --- | --- |
+| `<dir>/usr/local/bin/keytap` | `755` |
+| `<dir>/usr/local/etc/keytap.conf.sample` | `644` |
+| `<dir>/usr/local/share/zsh/site-functions/_keytap` | `644` |
+
+It uses no `sudo`, sets no owner, hands no secrets over and runs no
+`make verify`. The sample is staged under its own name, so a package never
+overwrites someone's settings file.
+
+The paths under `<dir>` cannot be moved to another prefix: the binary has them
+built in. The package must install the files at exactly these paths, owned by
+`root:wheel`; anything else gives up the protection the tool exists for
+([requirements](#requirements)). A package that replaces an installed build
+does not hand the secrets over either: each of them then asks for the Mac
+password until it is [stored again](#when-secrets-could-not-be-handed-over).
 
 ## Shell completion
 

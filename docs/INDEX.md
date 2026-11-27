@@ -9,7 +9,7 @@
 | [commands.md](commands.md) | What each command does step by step: arguments, input, output, exit codes |
 | [recipes.md](recipes.md) | Using a secret from scripts and other programs; moving an existing secret |
 | [settings.md](settings.md) | The settings file: location, who may write it, format |
-| [installation.md](installation.md) | Installing, updating, verifying, uninstalling; how an update keeps your secrets readable |
+| [installation.md](installation.md) | Checking the sources, installing, updating, verifying, uninstalling, staging for a package; how an update keeps your secrets readable |
 
 ## How it works
 
@@ -18,14 +18,17 @@
 | [keychain.md](keychain.md) | How secrets are stored, who can read them, own and foreign items |
 | [authentication.md](authentication.md) | The authentication prompt: policy, wording, the requesting process |
 | [reuse-window.md](reuse-window.md) | Remembering an authentication: session scope, record, validity |
-| [security.md](security.md) | What is protected, by what, and what is not |
+| [security.md](security.md) | What is protected, by what, and what is not; the assurance case |
 
 ## Working on it
 
 | Document | What it covers |
 | --- | --- |
-| [development.md](development.md) | Layout, tests, lint, CI, conventions, releasing, acceptance checklist |
+| [development.md](development.md) | Layout, tests, lint, CI, reproducible builds, conventions, releasing, acceptance checklist |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | What a pull request needs |
+| [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | How people taking part treat each other |
+| [GOVERNANCE.md](../GOVERNANCE.md) | Roles, how decisions are made, continuity |
+| [ROADMAP.md](../ROADMAP.md) | What is planned, and what is out of scope |
 | [SECURITY.md](../SECURITY.md) | Reporting a vulnerability |
 | [CHANGELOG.md](../CHANGELOG.md) | Changes per release |
 
@@ -47,5 +50,5 @@
 | `Settings.swift` | Loads and checks the settings file | [settings.md](settings.md) |
 | `Handover.swift` | Moves the secrets to the build that replaces this one | [installation.md](installation.md#updating) |
 | `RootOwned.swift` | Whether a file can be changed by root only | [settings.md](settings.md#who-may-write-it) |
-| `Makefile` | Build, test, lint, smoke, sign, install, verify, uninstall | [installation.md](installation.md), [development.md](development.md#building-and-testing) |
+| `Makefile` | Build, test, lint, smoke, sign, install, stage, verify, uninstall | [installation.md](installation.md), [development.md](development.md#building-and-testing) |
 | `completions/_keytap` | zsh completion | [installation.md](installation.md#shell-completion) |
