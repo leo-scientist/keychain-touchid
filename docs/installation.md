@@ -87,7 +87,8 @@ environment) builds and signs as usual, then only copies the files under
 | `<dir>/usr/local/share/zsh/site-functions/_keytap` | `644` |
 
 It uses no `sudo`, sets no owner, hands no secrets over and runs no
-`make verify`. The sample is staged under its own name, so a package never
+`make verify`; it ends by saying that nothing was installed, so a `DESTDIR`
+left set in the shell does not pass for an install or an update. The sample is staged under its own name, so a package never
 overwrites someone's settings file.
 
 The paths under `<dir>` cannot be moved to another prefix: the binary has them

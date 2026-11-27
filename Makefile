@@ -78,6 +78,7 @@ ifdef DESTDIR
 	install -m 755 $(BUILT) $(DESTDIR)$(INSTALLED)
 	install -m 644 $(CONFIG_SAMPLE) $(DESTDIR)$(CONFIG_DIR)/$(CONFIG_SAMPLE)
 	install -m 644 completions/_$(BINARY) $(DESTDIR)$(COMPLETION)
+	@echo "Staged under $(DESTDIR); nothing was installed on this Mac."
 else
 	@for directory in $(INSTALL_DIR) $(CONFIG_DIR) $(COMPLETION_DIR); do \
 		if [ ! -d $$directory ]; then \
