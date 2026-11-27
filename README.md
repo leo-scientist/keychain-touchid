@@ -1,5 +1,6 @@
 # keychain-touchid
 
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/17192/badge)](https://www.bestpractices.dev/projects/17192)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/leo-scientist/keychain-touchid/badge)](https://scorecard.dev/viewer/?uri=github.com/leo-scientist/keychain-touchid)
 
 A small macOS CLI, `keytap`, that keeps secrets in the login Keychain and hands
