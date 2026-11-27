@@ -21,7 +21,7 @@ Release tags after `0.1.0` are signed with the maintainer's GPG key, whose
 fingerprint is:
 
 ```
-FFB5 291C F893 FBA2 803E  6684 5B34 EBF0 8039 2366
+0E28 689C 6D4F 4A1C 1F4E  6F6F C1F2 F51F D575 AFD3
 ```
 
 To check a release before building it, import the key from GitHub, make sure
@@ -29,12 +29,14 @@ its fingerprint is the one above, and verify the tag:
 
 ```sh
 curl -fsSL https://github.com/leo-scientist.gpg | gpg --import
-gpg --fingerprint 5B34EBF080392366
+gpg --fingerprint C1F2F51FD575AFD3
 git verify-tag 0.2.0
 git switch --detach 0.2.0
 ```
 
-`git verify-tag` must say `Good signature`. GPG may add that the key is not
+`git verify-tag` must say `Good signature`. The tag is signed with one of the
+key's signing subkeys; where GPG prints a primary key fingerprint, it must be
+the one above. GPG may add that the key is not
 certified with a trusted signature; that only means you have not signed the key
 yourself. A missing or bad signature means the sources are not the ones
 released: do not build them.
