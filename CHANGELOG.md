@@ -5,6 +5,10 @@ versions follow [Semantic Versioning](https://semver.org/). `keytap --version` p
 
 ## [Unreleased]
 
+### Added
+
+- OpenSSF Scorecard: a weekly supply-chain check with its results behind a badge in the README.
+
 ## [0.1.0] - 2026-11-27
 
 First release. What it does is described in the [README](README.md).

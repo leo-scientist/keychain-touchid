@@ -1,5 +1,7 @@
 # keychain-touchid
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/leo-scientist/keychain-touchid/badge)](https://scorecard.dev/viewer/?uri=github.com/leo-scientist/keychain-touchid)
+
 A small macOS CLI, `keytap`, that keeps secrets in the login Keychain and hands
 one out only after Touch ID — on **every** read by default.
 
