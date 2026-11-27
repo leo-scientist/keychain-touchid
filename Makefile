@@ -26,6 +26,7 @@ help:
 	@echo "make format     format the sources in place"
 	@echo "make smoke      run the built binary on cases that touch neither the Keychain nor the settings"
 	@echo "make install    build, sign, install into $(INSTALL_DIR) (asks for sudo), verify"
+	@echo "                with DESTDIR=<dir>: only copy the files under <dir>, for a package"
 	@echo "make update     same as install; an installed build first hands its secrets over to the new one"
 	@echo "make verify     check the installed binary and settings file"
 	@echo "make uninstall  remove the binary, settings file and completion; secrets stay in the Keychain"
@@ -70,7 +71,15 @@ sign: build
 # stored. The installed build therefore moves them to the new one before it is replaced.
 # From the hand-over until the new build is in place, INT, TERM and HUP are ignored, so it cannot stop halfway.
 # See docs/installation.md#updating.
+# With DESTDIR set, the files are only staged under it for a package; see docs/installation.md#staging-for-a-package.
 install: sign
+ifdef DESTDIR
+	install -d $(DESTDIR)$(INSTALL_DIR) $(DESTDIR)$(CONFIG_DIR) $(DESTDIR)$(COMPLETION_DIR)
+	install -m 755 $(BUILT) $(DESTDIR)$(INSTALLED)
+	install -m 644 $(CONFIG_SAMPLE) $(DESTDIR)$(CONFIG_DIR)/$(CONFIG_SAMPLE)
+	install -m 644 completions/_$(BINARY) $(DESTDIR)$(COMPLETION)
+	@echo "Staged under $(DESTDIR); nothing was installed on this Mac."
+else
 	@for directory in $(INSTALL_DIR) $(CONFIG_DIR) $(COMPLETION_DIR); do \
 		if [ ! -d $$directory ]; then \
 			echo "sudo install -d -o root -g wheel -m 755 $$directory"; \
@@ -107,6 +116,7 @@ install: sign
 		sudo install -o root -g wheel -m 644 completions/_$(BINARY) $(COMPLETION); \
 	fi
 	@$(MAKE) --no-print-directory verify
+endif
 
 update: install
 

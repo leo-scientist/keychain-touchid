@@ -57,6 +57,28 @@ A development build (`swift build`, `swift run`) is a different program to the
 Keychain than the installed one and has no hardened runtime. Do not point it at
 real secrets, and never let the Keychain "Always Allow" it.
 
+## Reproducible builds
+
+Two builds of the same sources give the same binary, bit for bit, signature
+included, when three things are the same:
+
+- the toolchain (`swift --version`) and the macOS SDK it uses;
+- the directory the sources are built in, since the compiler records paths in
+  the binary;
+- the build's file name, `keytap`, since an ad-hoc signature carries it.
+
+`make build` and `make sign` meet the last one by themselves. To check, build
+and sign twice from a clean state and compare:
+
+```sh
+make clean sign && shasum -a 256 .build/release/keytap
+make clean sign && shasum -a 256 .build/release/keytap
+```
+
+This matters beyond auditing: the Keychain trusts a build by its signature, so
+rebuilding the installed sources gives the same program, and `make install`
+finds nothing to hand over.
+
 ## How the code is tested
 
 - **Command flows** (`CommandsTests`, `HandoverTests`) run the real flows over
@@ -105,8 +127,14 @@ of the session-scope test, run `make test` from a terminal tab.
    two agree.
 3. Open a pull request with these changes: `main` takes changes only through
    pull requests whose CI passed.
-4. After the merge, tag the merge commit on `main` with the version (`0.2.0`)
-   and push the tag.
+4. After the merge, tag the merge commit on `main` with the version, signed
+   with the maintainer's GPG key
+   ([installation.md](installation.md#checking-the-sources)), and push the tag:
+
+   ```sh
+   git tag -s 0.2.0 -m 0.2.0
+   git push origin 0.2.0
+   ```
 
 ## Acceptance checklist
 

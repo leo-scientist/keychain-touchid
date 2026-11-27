@@ -1,7 +1,8 @@
 # Contributing
 
 Bug reports and pull requests are welcome. Report security problems as [SECURITY.md](SECURITY.md) describes, not
-in an issue.
+in an issue. Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md). How decisions are made is in
+[GOVERNANCE.md](GOVERNANCE.md), and what is in and out of scope in [ROADMAP.md](ROADMAP.md).
 
 Before opening a pull request:
 
@@ -10,6 +11,9 @@ Before opening a pull request:
   one is not merged, whatever else it adds.
 - Add automated tests with every new feature and bug fix: tests that fail without the change. A pull request
   without them is not merged, unless the change is one that tests cannot cover (see the last point).
+- Sign off every commit (`git commit -s`). The `Signed-off-by` line certifies the
+  [Developer Certificate of Origin](https://developercertificate.org/): you wrote the change, or otherwise have the
+  right to submit it under the project's license.
 - Run `make lint test smoke`; CI runs the same. `make format` fixes most lint findings.
 - When behaviour changes, update the document that [docs/INDEX.md](docs/INDEX.md) lists for the file, and add a
   line under *Unreleased* in [CHANGELOG.md](CHANGELOG.md).

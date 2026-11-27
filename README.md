@@ -141,8 +141,10 @@ Everything else is in [docs/](docs/INDEX.md). Changes are listed in
 
 ## Contributing and security
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Report a vulnerability privately, as
-[SECURITY.md](SECURITY.md) describes.
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[code of conduct](CODE_OF_CONDUCT.md). Report a vulnerability privately, as
+[SECURITY.md](SECURITY.md) describes. How the project is run and where it is
+going: [GOVERNANCE.md](GOVERNANCE.md), [ROADMAP.md](ROADMAP.md).
 
 ## License
 
