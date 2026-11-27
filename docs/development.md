@@ -103,7 +103,7 @@ of the session-scope test, run `make test` from a terminal tab.
 2. In `CHANGELOG.md`, turn *Unreleased* into a section for that version and
    date, and add an empty *Unreleased* above it. `make smoke` fails until the
    two agree.
-3. Commit, then tag the commit `v<version>` and push the tag.
+3. Commit, then tag the commit with the version (`0.2.0`) and push the tag.
 
 ## Acceptance checklist
 

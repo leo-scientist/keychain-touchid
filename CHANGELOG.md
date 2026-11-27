@@ -9,5 +9,5 @@ versions follow [Semantic Versioning](https://semver.org/). `keytap --version` p
 
 First release. What it does is described in the [README](README.md).
 
-[Unreleased]: https://github.com/leo-scientist/keychain-touchid/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/leo-scientist/keychain-touchid/releases/tag/v0.1.0
+[Unreleased]: https://github.com/leo-scientist/keychain-touchid/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/leo-scientist/keychain-touchid/releases/tag/0.1.0
