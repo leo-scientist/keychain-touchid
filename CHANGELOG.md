@@ -8,6 +8,11 @@ versions follow [Semantic Versioning](https://semver.org/). `keytap --version` p
 ### Added
 
 - OpenSSF Scorecard: a weekly supply-chain check with its results behind a badge in the README.
+- CodeQL analysis of the Swift code and the workflows.
+
+### Changed
+
+- `SECURITY.md` links straight to private vulnerability reporting and says when a vulnerability is disclosed.
 
 ## [0.1.0] - 2026-11-27
 

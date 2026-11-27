@@ -11,7 +11,7 @@ Makefile                       build, test, lint, sign, install, verify, uninsta
 keytap.conf.sample             settings file with every setting commented out
 completions/_keytap            zsh completion
 docs/                          this documentation
-.github/                       CI and Scorecard workflows, Dependabot, issue and pull request templates
+.github/                       CI, CodeQL and Scorecard workflows, Dependabot, issue and pull request templates
 .swift-format                  formatter configuration
 ```
 
