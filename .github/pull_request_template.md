@@ -2,6 +2,7 @@
 
 ## Checklist
 
+- [ ] Tests added for the new feature or fix
 - [ ] `make lint test smoke` passes
 - [ ] No [rule for changing the code](https://github.com/leo-scientist/keychain-touchid/blob/main/docs/security.md#rules-for-changing-the-code) is broken
 - [ ] Docs and `CHANGELOG.md` updated for changed behaviour
