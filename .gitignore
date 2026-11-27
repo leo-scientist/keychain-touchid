@@ -9,3 +9,4 @@ DerivedData/
 .vscode/
 ai_agents/
 CLAUDE.md
+.claude/
