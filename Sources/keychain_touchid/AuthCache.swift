@@ -35,7 +35,7 @@ struct AuthCache {
 
         // Whatever is wrong with a record — missing, unreadable, malformed — the answer is to authenticate.
         guard let bytes = try? records.read(Self.recordID(for: item)),
-              let record = try? JSONDecoder().decode(CacheRecord.self, from: Data(bytes))
+            let record = try? JSONDecoder().decode(CacheRecord.self, from: Data(bytes))
         else {
             return nil
         }
@@ -71,9 +71,8 @@ struct AuthCache {
             secretHash: Data(SHA256.hash(data: secret))
         )
 
-        // Replacing instead of updating: an update would keep the trust list of the build that created the record.
-        try forget(item)
-        try records.add([UInt8](JSONEncoder().encode(record)), as: Self.recordID(for: item))
+        // Created anew, like every value the tool stores: a record left by an earlier build could not be read.
+        try records.replace(Self.recordID(for: item), with: [UInt8](JSONEncoder().encode(record)))
     }
 
     func forget(_ item: ItemID) throws {

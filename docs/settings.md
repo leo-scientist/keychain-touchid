@@ -4,7 +4,7 @@ The optional settings file. Code: `Sources/keychain_touchid/Settings.swift`.
 
 ## Location and defaults
 
-`/usr/local/etc/keychain-touchid.conf`. The path is fixed in the binary.
+`/usr/local/etc/keytap.conf`. The path is fixed in the binary.
 
 Without the file, the defaults apply: ask on every read, accept Touch ID, Apple
 Watch or the Mac password. `make install` puts a sample there with every setting
@@ -51,7 +51,7 @@ For the same reason nothing that weakens authentication can be given as a
 command-line option or an environment variable. An option can only tighten:
 `get --no-cache`.
 
-To change a setting: `sudoedit /usr/local/etc/keychain-touchid.conf`.
+To change a setting: `sudoedit /usr/local/etc/keytap.conf`.
 
 ## When something is wrong
 

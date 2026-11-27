@@ -7,6 +7,10 @@ final class TemporaryKeychain {
     let reference: SecKeychain
 
     init() throws {
+        // Off for the whole test process and never turned back on. A store restores the value it found, so
+        // while this stays off no test can show a Keychain dialog, however tests interleave.
+        SecKeychainSetUserInteractionAllowed(false)
+
         let path = FileManager.default.temporaryDirectory
             .appendingPathComponent("keychain-touchid-test-\(UUID().uuidString).keychain-db").path
         let password = "test"
@@ -22,6 +26,10 @@ final class TemporaryKeychain {
 
     deinit {
         SecKeychainDelete(reference)
+    }
+
+    func lock() {
+        SecKeychainLock(reference)
     }
 
     func store(marker: String = KeychainStore.secretMarker) -> KeychainStore {
@@ -49,6 +57,13 @@ final class FakeStore: SecretStore {
     var secrets: [ItemID: [UInt8]] = [:]
     var foreignItems: Set<ItemID> = []
     var readError: StoreError?
+    /// Items the Keychain would not let this build read.
+    var unreadable: Set<ItemID> = []
+    /// Items that cannot be created, whatever the reason.
+    var failingAdds: Set<ItemID> = []
+    /// Runs just before every attempt to create an item, as a process racing the tool would.
+    var beforeAdding: (ItemID) -> Void = { _ in }
+    var locked = false
     private(set) var calls: [String] = []
 
     func state(of item: ItemID) -> ItemState {
@@ -66,6 +81,10 @@ final class FakeStore: SecretStore {
             throw readError
         }
 
+        guard !unreadable.contains(item) else {
+            throw StoreError.accessDenied
+        }
+
         guard let secret = secrets[item] else {
             throw StoreError.notFound
         }
@@ -75,19 +94,14 @@ final class FakeStore: SecretStore {
 
     func add(_ secret: [UInt8], as item: ItemID) throws {
         calls.append("add")
+        beforeAdding(item)
+
+        guard !failingAdds.contains(item) else {
+            throw StoreError.unexpected(errSecIO)
+        }
 
         guard state(of: item) == .absent else {
             throw StoreError.duplicateItem
-        }
-
-        secrets[item] = secret
-    }
-
-    func update(_ secret: [UInt8], of item: ItemID) throws {
-        calls.append("update")
-
-        guard secrets[item] != nil else {
-            throw StoreError.notFound
         }
 
         secrets[item] = secret
@@ -99,6 +113,17 @@ final class FakeStore: SecretStore {
         guard secrets.removeValue(forKey: item) != nil else {
             throw StoreError.notFound
         }
+    }
+
+    func removeAny(_ item: ItemID) {
+        calls.append("removeAny")
+        secrets[item] = nil
+        foreignItems.remove(item)
+        unreadable.remove(item)
+    }
+
+    func isLocked() -> Bool {
+        locked
     }
 
     func list(service: String?) -> [ItemID] {

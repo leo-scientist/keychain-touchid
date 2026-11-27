@@ -9,7 +9,7 @@
 | [commands.md](commands.md) | What each command does step by step: arguments, input, output, exit codes |
 | [recipes.md](recipes.md) | Using a secret from scripts and other programs; moving an existing secret |
 | [settings.md](settings.md) | The settings file: location, who may write it, format |
-| [installation.md](installation.md) | Installing, updating, verifying, uninstalling; what changes after a rebuild |
+| [installation.md](installation.md) | Installing, updating, verifying, uninstalling; how an update keeps your secrets readable |
 
 ## How it works
 
@@ -24,7 +24,10 @@
 
 | Document | What it covers |
 | --- | --- |
-| [development.md](development.md) | Layout, tests, conventions, acceptance checklist |
+| [development.md](development.md) | Layout, tests, lint, CI, conventions, releasing, acceptance checklist |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | What a pull request needs |
+| [SECURITY.md](../SECURITY.md) | Reporting a vulnerability |
+| [CHANGELOG.md](../CHANGELOG.md) | Changes per release |
 
 ## Where the logic lives
 
@@ -32,14 +35,17 @@
 | --- | --- | --- |
 | `Main.swift` | Entry point: wires the parts together, turns an error into a message and an exit code | [commands.md](commands.md#a-run-from-start-to-end) |
 | `Arguments.swift` | Parses the command line, validates names | [commands.md](commands.md#arguments) |
-| `Commands.swift` | The flow of `get`, `set`, `delete`, `list` | [commands.md](commands.md) |
+| `Commands.swift` | The flow of `get`, `set`, `delete`, `list`, `receive` | [commands.md](commands.md) |
 | `SecretInput.swift` | Reads a secret from a pipe or a hidden prompt | [commands.md](commands.md#entering-a-secret) |
 | `ExitCode.swift` | Exit codes and the message for every error | [commands.md](commands.md#exit-codes) |
-| `KeychainStore.swift` | Keychain items: add, update, read, delete, list, own or foreign | [keychain.md](keychain.md) |
+| `KeychainStore.swift` | Keychain items: add, read, delete, list, remove any, replace, lock state, own or foreign | [keychain.md](keychain.md) |
 | `Authenticator.swift` | The authentication prompt and the policy behind it | [authentication.md](authentication.md) |
 | `Requester.swift` | What asked and where it was started, text safe to display, the prompt wording | [authentication.md](authentication.md#the-requesting-process) |
 | `ProcessAncestry.swift` | Reads a process, its arguments and its ancestors from the kernel | [authentication.md](authentication.md#how-the-processes-are-read) |
 | `AuthCache.swift` | The remembered authentication | [reuse-window.md](reuse-window.md) |
 | `SessionScope.swift` | Which terminal session a process belongs to | [reuse-window.md](reuse-window.md#session-scope) |
 | `Settings.swift` | Loads and checks the settings file | [settings.md](settings.md) |
-| `Makefile` | Build, sign, install, verify, uninstall | [installation.md](installation.md) |
+| `Handover.swift` | Moves the secrets to the build that replaces this one | [installation.md](installation.md#updating) |
+| `RootOwned.swift` | Whether a file can be changed by root only | [settings.md](settings.md#who-may-write-it) |
+| `Makefile` | Build, test, lint, smoke, sign, install, verify, uninstall | [installation.md](installation.md), [development.md](development.md#building-and-testing) |
+| `completions/_keytap` | zsh completion | [installation.md](installation.md#shell-completion) |

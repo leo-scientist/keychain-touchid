@@ -8,6 +8,8 @@ enum Command: Equatable {
     case set(ItemID)
     case delete(ItemID)
     case list(service: String?)
+    case handover
+    case receive
 }
 
 struct UsageError: Error, Equatable {
@@ -20,11 +22,15 @@ enum Arguments {
 
     static let usage = """
         Usage:
-          keychain-touchid set    <service> <account>               store a secret (piped stdin or hidden prompt)
-          keychain-touchid get    [--no-cache] <service> <account>  print the secret after authentication
-          keychain-touchid delete <service> <account>               remove the secret
-          keychain-touchid list   [service]                         list stored secrets (names only)
+          keytap set    <service> [account]               store a secret (piped stdin or hidden prompt)
+          keytap get    [--no-cache] <service> [account]  print the secret after authentication
+          keytap delete <service> [account]               remove the secret
+          keytap list   [service]                         list stored secrets (names only)
+          keytap --version                                print the version
+          keytap handover                                 move the secrets to a new build (run by make update)
+          keytap receive                                  take one secret from the build being replaced (run by handover)
 
+        Account:    the current user's name when omitted
         Settings:   \(Settings.defaultPath) (root-owned, optional)
         Exit codes: 0 success, 1 error, 2 usage, 3 authentication denied, 4 not found
         """
@@ -37,7 +43,16 @@ enum Arguments {
         return ["help", "-h", "--help"].contains(first)
     }
 
-    static func parse(_ arguments: [String]) throws -> Command {
+    static func isVersionRequest(_ arguments: [String]) -> Bool {
+        guard let first = arguments.first else {
+            return false
+        }
+
+        return ["version", "--version"].contains(first)
+    }
+
+    /// `defaultAccount` names the item when the account is omitted; nil when it could not be determined.
+    static func parse(_ arguments: [String], defaultAccount: String?) throws -> Command {
         guard let name = arguments.first else {
             throw UsageError(message: "missing command")
         }
@@ -48,13 +63,26 @@ enum Arguments {
         case "get":
             let (options, names) = try split(rest, allowedOptions: [noCacheOption])
 
-            return .get(try item(from: names, command: name), useCache: !options.contains(noCacheOption))
+            return .get(
+                try item(from: names, command: name, defaultAccount: defaultAccount),
+                useCache: !options.contains(noCacheOption)
+            )
         case "set":
-            return .set(try item(from: try split(rest, allowedOptions: []).names, command: name))
+            let names = try split(rest, allowedOptions: []).names
+
+            return .set(try item(from: names, command: name, defaultAccount: defaultAccount))
         case "delete":
-            return .delete(try item(from: try split(rest, allowedOptions: []).names, command: name))
+            let names = try split(rest, allowedOptions: []).names
+
+            return .delete(try item(from: names, command: name, defaultAccount: defaultAccount))
         case "list":
             return .list(service: try serviceFilter(from: try split(rest, allowedOptions: []).names))
+        case "handover", "receive":
+            guard rest.isEmpty else {
+                throw UsageError(message: "“\(name)” takes no arguments")
+            }
+
+            return name == "handover" ? .handover : .receive
         default:
             throw UsageError(message: "unknown command “\(DisplayText.sanitized(name, maxLength: maxNameLength))”")
         }
@@ -77,12 +105,21 @@ enum Arguments {
         return (Set(options), head.filter { !$0.hasPrefix("-") } + tail)
     }
 
-    private static func item(from names: [String], command: String) throws -> ItemID {
-        guard names.count == 2 else {
-            throw UsageError(message: "“\(command)” takes <service> and <account>")
+    private static func item(from names: [String], command: String, defaultAccount: String?) throws -> ItemID {
+        guard (1...2).contains(names.count) else {
+            throw UsageError(message: "“\(command)” takes <service> and an optional [account]")
         }
 
-        return ItemID(service: try service(names[0]), account: try validated(names[1], label: "account"))
+        guard let account = names.count == 2 ? names[1] : defaultAccount else {
+            throw UsageError(message: "the current user's name could not be determined; give the [account]")
+        }
+
+        return try item(service: names[0], account: account)
+    }
+
+    /// The item for a pair of names, if they are ones the tool stores. See docs/commands.md#names.
+    static func item(service: String, account: String) throws -> ItemID {
+        ItemID(service: try self.service(service), account: try validated(account, label: "account"))
     }
 
     private static func serviceFilter(from names: [String]) throws -> String? {

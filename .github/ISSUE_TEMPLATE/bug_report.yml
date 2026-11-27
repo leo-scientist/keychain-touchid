@@ -1,0 +1,36 @@
+name: Bug report
+description: Something does not work as the documentation says.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A security problem? Do not file it here; see SECURITY.md.
+        Never paste a secret's value, even a revoked one.
+  - type: input
+    id: version
+    attributes:
+      label: keytap version
+      description: Output of `keytap --version`.
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      description: The commands you ran, in order.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected and what happened
+      description: Include the exit code and any message on stderr.
+    validations:
+      required: true

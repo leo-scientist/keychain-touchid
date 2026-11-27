@@ -21,6 +21,14 @@ enum DisplayText {
 
         return String(String.UnicodeScalarView(scalars.prefix(maxLength))) + "…"
     }
+
+    /// An item's names for a message. They may come back from the Keychain, where anyone can write them.
+    static func described(_ item: ItemID) -> String {
+        let service = sanitized(item.service, maxLength: Arguments.maxNameLength)
+        let account = sanitized(item.account, maxLength: Arguments.maxNameLength)
+
+        return "“\(service)” (\(account))"
+    }
 }
 
 /// What asked for the secret and where it was started from. A hint for the user, not a guarantee: a process
@@ -77,8 +85,8 @@ struct Requester: Equatable {
         let program = process.name.lowercased()
 
         guard interpreters.contains(program) || program.hasPrefix("python"),
-              arguments.count > 1,
-              !arguments[1].hasPrefix("-")
+            arguments.count > 1,
+            !arguments[1].hasPrefix("-")
         else {
             return nil
         }
@@ -89,7 +97,8 @@ struct Requester: Equatable {
     private static func origin(of ancestry: [ProcessSnapshot]) -> Origin? {
         // The outermost application is the one the user sees; nearer ones are helpers or packaged interpreters.
         if let index = ancestry.lastIndex(where: { $0.applicationName != nil }),
-           let application = ancestry[index].applicationName {
+            let application = ancestry[index].applicationName
+        {
             return index == 0 ? nil : .application(displayed(application))
         }
 
@@ -110,7 +119,8 @@ enum PromptText {
     ///
     /// - Parameter reuseSeconds: how long this authentication will be reused, when the reuse window applies.
     static func reason(for item: ItemID, requester: Requester, reuseSeconds: Int?) -> String {
-        let request = "give the secret “\(item.service)” (\(item.account)) to \(requester.name)"
+        let request =
+            "give the secret “\(item.service)” (\(item.account)) to \(requester.name)"
             + description(of: requester.origin)
 
         guard let reuseSeconds else {
@@ -118,6 +128,12 @@ enum PromptText {
         }
 
         return request + ", and to let this terminal read it again for \(duration(reuseSeconds)) without asking"
+    }
+
+    /// For `handover`, which gives every secret to the build that replaces this one.
+    static func handoverReason(count: Int, requester: Requester) -> String {
+        "hand its \(counted(count, "secret")) over to the new build that is being installed, "
+            + "at the request of \(requester.name)" + description(of: requester.origin)
     }
 
     static func duration(_ seconds: Int) -> String {

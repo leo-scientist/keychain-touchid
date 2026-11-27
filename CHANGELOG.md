@@ -1,0 +1,13 @@
+# Changelog
+
+Notable changes, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
+versions follow [Semantic Versioning](https://semver.org/). `keytap --version` prints the installed one.
+
+## [Unreleased]
+
+## [0.1.0] - 2026-11-27
+
+First release. What it does is described in the [README](README.md).
+
+[Unreleased]: https://github.com/leo-scientist/keychain-touchid/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/leo-scientist/keychain-touchid/releases/tag/v0.1.0

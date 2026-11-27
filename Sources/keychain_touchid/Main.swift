@@ -2,7 +2,9 @@ import Foundation
 
 @main
 struct KeychainTouchID {
-    static let programName = "keychain-touchid"
+    static let programName = "keytap"
+    /// Matches the latest release in CHANGELOG.md and its git tag.
+    static let version = "0.1.0"
 
     static func main() async {
         let code = await run(Array(CommandLine.arguments.dropFirst()))
@@ -17,8 +19,14 @@ struct KeychainTouchID {
             return .success
         }
 
+        guard !Arguments.isVersionRequest(arguments) else {
+            print("\(programName) \(version)")
+
+            return .success
+        }
+
         do {
-            let command = try Arguments.parse(arguments)
+            let command = try Arguments.parse(arguments, defaultAccount: currentUserName())
             let settings = try Settings.load()
             try await commands(with: settings).run(command)
 
@@ -35,24 +43,49 @@ struct KeychainTouchID {
         }
     }
 
-    private static func commands(with settings: Settings) -> Commands {
-        Commands(
-            store: KeychainStore(),
-            authenticator: LocalAuthenticator(policy: settings.policy.localAuthenticationPolicy),
-            requester: .parent(),
+    private static func commands(with settings: Settings) throws -> Commands {
+        let keychain = try KeychainStore.loginKeychain()
+        let authenticator = LocalAuthenticator(policy: settings.policy.localAuthenticationPolicy)
+        let requester = Requester.parent()
+        let output = Output(
+            write: { try FileHandle.standardOutput.write(contentsOf: Data($0)) },
+            note: report,
+            isTerminal: isatty(STDOUT_FILENO) == 1
+        )
+        let handover = Handover(
+            store: KeychainStore(keychain: keychain, allowsUserInteraction: false),
+            authenticator: authenticator,
+            requester: requester,
+            successor: InstalledSuccessor(),
+            output: output
+        )
+
+        return Commands(
+            store: KeychainStore(keychain: keychain),
+            authenticator: authenticator,
+            requester: requester,
             readSecret: SecretInput.read,
             cache: AuthCache(
-                records: KeychainStore(marker: AuthCache.marker, allowsUserInteraction: false),
+                records: KeychainStore(marker: AuthCache.marker, keychain: keychain, allowsUserInteraction: false),
                 window: settings.cacheSeconds,
                 session: .current(),
                 now: Date.init
             ),
-            output: Output(
-                write: { try FileHandle.standardOutput.write(contentsOf: Data($0)) },
-                note: report,
-                isTerminal: isatty(STDOUT_FILENO) == 1
-            )
+            handover: handover.run,
+            readRecord: {
+                try SecretInput.readAll(from: .standardInput, limit: HandoverRecord.maxEncodedSize + 1)
+            },
+            output: output
         )
+    }
+
+    /// From the user database rather than `$USER`, which the caller can set to anything.
+    private static func currentUserName() -> String? {
+        guard let entry = getpwuid(getuid()) else {
+            return nil
+        }
+
+        return String(cString: entry.pointee.pw_name)
     }
 
     private static func report(_ message: String) {

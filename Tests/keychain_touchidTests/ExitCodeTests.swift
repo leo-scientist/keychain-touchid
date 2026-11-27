@@ -22,9 +22,11 @@ import Testing
             (StoreError.notFound, .notFound),
             (StoreError.duplicateItem, .failure),
             (StoreError.accessDenied, .authentication),
+            (StoreError.locked, .failure),
             (StoreError.unexpected(errSecIO), .failure),
             (AuthenticationError(message: "cancelled"), .authentication),
             (SettingsError(message: "line 1: unknown setting"), .failure),
+            (HandoverError(message: "the new build is missing"), .failure),
             (CocoaError(.fileReadUnknown), .failure),
         ]
 

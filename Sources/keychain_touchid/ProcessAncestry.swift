@@ -14,9 +14,9 @@ struct ProcessSnapshot: Equatable {
     /// The outermost application bundle the executable sits in, without the `.app` suffix.
     var applicationName: String? {
         guard let components = executablePath?.split(separator: "/"),
-              let index = components.indices.dropLast().first(where: { index in
-                  components[index].hasSuffix(Self.bundleSuffix) && components[index + 1] == "Contents"
-              })
+            let index = components.indices.dropLast().first(where: { index in
+                components[index].hasSuffix(Self.bundleSuffix) && components[index + 1] == "Contents"
+            })
         else {
             return nil
         }

@@ -13,7 +13,7 @@ struct SettingsError: Error, Equatable {
 
 /// Settings come only from a root-owned file. See docs/settings.md.
 struct Settings: Equatable {
-    static let defaultPath = "/usr/local/etc/keychain-touchid.conf"
+    static let defaultPath = "/usr/local/etc/keytap.conf"
     static let maxCacheSeconds = 86_400
     static let defaults = Settings(cacheSeconds: 0, policy: .any)
     private static let maxFileSize = 64 * 1024
@@ -63,16 +63,15 @@ struct Settings: Equatable {
     }
 
     static func checkTrust(owner: uid_t, mode: mode_t, requiredOwner: uid_t = 0) throws {
-        guard mode & S_IFMT == S_IFREG else {
+        switch RootOwned.problem(owner: owner, mode: mode, type: S_IFREG, requiredOwner: requiredOwner) {
+        case .wrongType:
             throw SettingsError(message: "the settings file is not a regular file")
-        }
-
-        guard owner == requiredOwner else {
+        case .wrongOwner:
             throw SettingsError(message: "the settings file must be owned by user id \(requiredOwner)")
-        }
-
-        guard mode & (S_IWGRP | S_IWOTH) == 0 else {
+        case .writableByOthers:
             throw SettingsError(message: "the settings file must not be writable by group or others")
+        case nil:
+            return
         }
     }
 

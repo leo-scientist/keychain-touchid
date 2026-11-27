@@ -14,7 +14,7 @@ silently. With it, reading a secret takes an authentication the user sees.
 
 ## The chain
 
-The Touch ID check is made by the `keychain-touchid` binary, not by the
+The Touch ID check is made by the `keytap` binary, not by the
 Keychain. So the protection is a chain, and each link has its own defence:
 
 | Link | What could go wrong | Defence |
@@ -29,8 +29,11 @@ Further measures:
 
 | Risk | Defence |
 | --- | --- |
-| A secret stored earlier by another program stays readable by it | Foreign items are never adopted ([keychain.md](keychain.md#own-foreign-absent)) |
-| A program named `keychain-touchid` earlier in `PATH` stands in | Use the full path in scripts; such a program cannot read the item silently anyway |
+| An update hands every secret to another program | `handover` gives them only to the build at one fixed path that root installed, after an authentication that says so ([installation.md](installation.md#why-this-is-safe)) |
+| A secret stored earlier by another program stays readable by it | Foreign items are never touched ([keychain.md](keychain.md#own-foreign-absent)) |
+| Another process puts an item of its own under a secret's name, so that the next value is written into it | A secret is only ever written by creating the item, which only its creator can read; an item in the way is removed ([keychain.md](keychain.md#writing-a-secret)) |
+| The place where secrets are created is pointed at a keychain another process controls | Every operation names the login keychain by its path; the default keychain, the search list and `$HOME` play no part ([keychain.md](keychain.md#which-keychain)) |
+| A program named `keytap` earlier in `PATH` stands in | Use the full path in scripts; such a program cannot read the item silently anyway |
 | A remembered authentication is forged or used from elsewhere | The record holds the hash of the secret and is tied to the terminal session ([reuse-window.md](reuse-window.md)) |
 
 ## What it does not do
@@ -39,8 +42,10 @@ Further measures:
   stored with it. A program that reads the Keychain directly never goes through
   it.
 - **It does not protect against deletion or replacement.** Any process running
-  as the user can delete a Keychain item or overwrite its value without a
-  password. Only reading is protected.
+  as the user can remove a Keychain item, or change its value, without a
+  password. A changed item can then be read by nobody without the Mac password,
+  the tool included ([keychain.md](keychain.md#what-another-program-can-do)).
+  Only reading is protected.
 - **It cannot vouch for the requester.** The names in the dialog come from the
   requesting process and its ancestors, which choose their own names and
   arguments.
@@ -56,9 +61,9 @@ Further measures:
 ## Keychain prompts
 
 A Keychain prompt asking for the Mac password about one of these items means a
-program other than the installed binary is trying to read it. The only expected
-case is the first read after `make install` or `make update` of a changed build
-([installation.md](installation.md#after-a-rebuild)).
+program other than the build that stored it is trying to read it. `make update`
+avoids that by handing the secrets over to the new build; the only expected case
+is a secret that [could not be handed over](installation.md#when-secrets-could-not-be-handed-over).
 
 Never answer **Always Allow** for any other program, including a development
 build (`swift build`, `swift run`): it has no hardened runtime, and it would be
@@ -68,9 +73,15 @@ added to the item's trust list permanently.
 
 - Nothing may let a caller weaken or skip authentication: no option, no
   environment variable, no file the user can write.
+- A secret is written only by creating an item. Nothing may change the value of
+  an existing item.
+- Every Keychain call names the keychain it works on. Nothing may fall back to
+  the default keychain or the search list.
 - An option may only tighten behaviour.
-- Only `get` reads a secret's value, and only after the checks in
-  [commands.md](commands.md#get).
+- Only `get` and `handover` read a secret's value, each only after an
+  authentication, as described in [commands.md](commands.md).
+- `handover` gives secrets to nothing but the root-owned successor at its fixed
+  path, and `receive` only ever creates an item.
 - Text that reaches the dialog or the terminal from outside — arguments, process
   names, names read back from the Keychain — is validated or sanitized.
 - Data read back from the Keychain is treated as written by anyone.

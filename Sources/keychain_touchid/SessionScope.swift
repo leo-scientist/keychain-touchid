@@ -25,8 +25,8 @@ struct SessionScope: Codable, Equatable {
         let sessionID = getsid(0)
 
         guard sessionID > 0,
-              let own = ProcessAncestry.info(of: getpid()),
-              let leader = ProcessAncestry.info(of: sessionID)
+            let own = ProcessAncestry.info(of: getpid()),
+            let leader = ProcessAncestry.info(of: sessionID)
         else {
             return nil
         }

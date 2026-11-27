@@ -1,0 +1,42 @@
+#compdef keytap
+# Completes commands, then service and account names from `keytap list`, which never reads a value or prompts.
+# See docs/installation.md#shell-completion.
+
+_keytap_names() {
+  local field=$1 service=$2
+  local -a filter names
+
+  if [[ -n $service ]]; then
+    filter=(-- "$service")
+  fi
+
+  names=(${(f)"$(keytap list "${filter[@]}" 2>/dev/null | cut -f$field | sort -u)"})
+  compadd -a names
+}
+
+_keytap() {
+  local -a commands=(
+    'set:store a secret'
+    'get:print a secret after authentication'
+    'delete:remove a secret'
+    'list:list stored secrets (names only)'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe -t commands 'keytap command' commands
+    return
+  fi
+
+  local command=$words[2]
+  local -a names=(${words[3,CURRENT-1]:#-*})
+
+  if [[ $command == get && $PREFIX == -* ]]; then
+    compadd -- --no-cache
+  elif (( ${#names} == 0 )) && [[ $command == (get|set|delete|list) ]]; then
+    _keytap_names 1
+  elif (( ${#names} == 1 )) && [[ $command == (get|set|delete) ]]; then
+    _keytap_names 2 "$names[1]"
+  fi
+}
+
+_keytap "$@"

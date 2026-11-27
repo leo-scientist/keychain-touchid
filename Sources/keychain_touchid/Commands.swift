@@ -15,6 +15,9 @@ struct Commands {
     let requester: Requester
     let readSecret: (ItemID) throws -> [UInt8]
     let cache: AuthCache
+    let handover: () async throws -> Void
+    /// The bytes the build being replaced sends to `receive`.
+    let readRecord: () throws -> [UInt8]
     let output: Output
 
     func run(_ command: Command) async throws {
@@ -27,6 +30,10 @@ struct Commands {
             try delete(item)
         case let .list(service):
             try list(service: service)
+        case .handover:
+            try await handover()
+        case .receive:
+            try receive()
         }
     }
 
@@ -83,13 +90,38 @@ struct Commands {
 
         let secret = try readSecret(item)
 
-        if state == .own {
-            try store.update(secret, of: item)
-            output.note("updated “\(item.service)” (\(item.account))")
-        } else {
+        guard state == .own else {
             try store.add(secret, as: item)
             output.note("created “\(item.service)” (\(item.account))")
+
+            return
         }
+
+        // The marker does not prove who created the item, and a value must not be written into an item
+        // somebody else created. So the item is created anew, which makes this build its only reader.
+        do {
+            try store.replace(item, with: secret)
+        } catch {
+            // The old value is never read, since that would be a read without authentication, so it cannot
+            // be put back. The user has to know when it is gone.
+            if let current = try? store.state(of: item), current != .own {
+                output.note(
+                    "the previous value of “\(item.service)” (\(item.account)) was removed and the new one "
+                        + "could not be stored; run set again")
+            }
+
+            throw error
+        }
+
+        output.note("updated “\(item.service)” (\(item.account))")
+    }
+
+    /// Run by the build being replaced. Only ever creates the item and never touches one that exists, so a
+    /// secret cannot end up in an item some other process put in its place. See docs/commands.md#receive.
+    private func receive() throws {
+        let (item, secret) = try HandoverRecord.decode(readRecord())
+
+        try store.add(secret, as: item)
     }
 
     private func delete(_ item: ItemID) throws {

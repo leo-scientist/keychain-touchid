@@ -6,10 +6,16 @@ Code: `Authenticator.swift`, `Requester.swift` and `ProcessAncestry.swift` in
 
 ## When it happens
 
-Before every read of a secret by `get`, and nowhere else. The only way to skip it
-is a remembered authentication ([reuse-window.md](reuse-window.md)), which is off
-unless the root-owned settings file turns it on. No command-line option and no
-environment variable can skip it.
+Before every read of a secret's value:
+
+- by `get`, before each read. The only way to skip it is a remembered
+  authentication ([reuse-window.md](reuse-window.md)), which is off unless the
+  root-owned settings file turns it on;
+- by `handover`, once for all the secrets it moves during an update
+  ([installation.md](installation.md#updating)).
+
+No command-line option and no environment variable can skip it. Nothing else
+reads a value, so nothing else authenticates.
 
 The check is not connected to the Keychain cryptographically. The Keychain lets
 this binary read the item; the binary chooses to authenticate first. What makes
@@ -42,7 +48,7 @@ The system starts the sentence with the program's name and ends it with a full
 stop; the tool supplies the middle:
 
 ```
-keychain-touchid is trying to give the secret “op-service-account” (sam)
+keytap is trying to give the secret “op-service-account” (sam)
 to vault-pass.sh, running in Terminal.
 ```
 
@@ -65,13 +71,21 @@ that the user knows one approval covers more than one read:
 The duration is given in the largest unit that is exact: `90 seconds`,
 `5 minutes`, `24 hours`.
 
+For `handover` the sentence names how many secrets are moved instead of one
+item:
+
+```
+keytap is trying to hand its 3 secrets over to the new build that
+is being installed, at the request of bash, running in Terminal.
+```
+
 ## The requesting process
 
 The prompt has to let the user recognise an unexpected request, and "bash" does
 not do that. So the tool looks at the process that ran it and at that process's
 ancestors, as the kernel reports them.
 
-**What asked** is the parent of the `keychain-touchid` process:
+**What asked** is the parent of the `keytap` process:
 
 - If the parent is an interpreter running a script, the name is the script's
   file name: `vault-pass.sh`, `sync.py`. This holds when the parent is a known

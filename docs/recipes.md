@@ -4,9 +4,9 @@ Ways to use a stored secret from other programs.
 
 ## The pattern
 
-Run `keychain-touchid get` where the secret is needed and use its output.
+Run `keytap get` where the secret is needed and use its output.
 
-- Call the binary by its full path, `/usr/local/bin/keychain-touchid`, so a
+- Call the binary by its full path, `/usr/local/bin/keytap`, so a
   directory earlier in `PATH` cannot stand in for it.
 - Check the exit code: a refused authentication prints nothing and returns 3
   ([commands.md](commands.md#exit-codes)).
@@ -18,7 +18,7 @@ Run `keychain-touchid get` where the secret is needed and use its output.
 Many tools can run a command to obtain a password. For example restic:
 
 ```sh
-export RESTIC_PASSWORD_COMMAND='/usr/local/bin/keychain-touchid get restic my-repo'
+export RESTIC_PASSWORD_COMMAND='/usr/local/bin/keytap get restic my-repo'
 ```
 
 ## A secret for one program only
@@ -29,7 +29,7 @@ and nowhere else. Here the 1Password CLI, in `~/.zshrc`:
 ```sh
 op() {
   local token
-  token="$(/usr/local/bin/keychain-touchid get op-service-account "$USER")" || return 1
+  token="$(/usr/local/bin/keytap get op-service-account)" || return 1
   OP_SERVICE_ACCOUNT_TOKEN="$token" command op "$@"
 }
 ```
@@ -41,7 +41,7 @@ Here an Ansible `vault-pass.sh`, which fetches the vault password from
 
 ```sh
 #!/bin/sh
-token="$(/usr/local/bin/keychain-touchid get op-service-account "$USER")" || exit 1
+token="$(/usr/local/bin/keytap get op-service-account)" || exit 1
 
 OP_SERVICE_ACCOUNT_TOKEN="$token" exec op read "op://<vault>/<item>/<field>"
 ```
@@ -55,14 +55,14 @@ separate commands in one terminal each need it, consider the
 ## Moving an existing secret
 
 A secret that already sits in the Keychain has to be stored again by
-`keychain-touchid`. It cannot take over the old item, because that item would
+`keytap`. It cannot take over the old item, because that item would
 keep trusting the programs that could read it before
 ([keychain.md](keychain.md#own-foreign-absent)). The old item is removed only if
 the new one was stored:
 
 ```sh
 security find-generic-password -s <old-service> -a <account> -w \
-  | /usr/local/bin/keychain-touchid set <new-service> <account> \
+  | /usr/local/bin/keytap set <new-service> <account> \
   && security delete-generic-password -s <old-service> -a <account>
 ```
 

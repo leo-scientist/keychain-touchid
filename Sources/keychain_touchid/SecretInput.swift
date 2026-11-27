@@ -22,9 +22,12 @@ enum SecretInput {
         return try readHidden(prompt: "Secret for “\(item.service)” (\(item.account)): ")
     }
 
-    /// Stops one byte past the largest acceptable input, which is enough to tell it was exceeded.
-    static func readAll(from handle: FileHandle) throws -> [UInt8] {
-        let limit = maxPipedBytes + "\r\n".utf8.count + 1
+    /// Stops at `limit`, by default one byte past the largest acceptable secret and its line ending, which is
+    /// enough to tell the limit was exceeded.
+    static func readAll(
+        from handle: FileHandle,
+        limit: Int = maxPipedBytes + "\r\n".utf8.count + 1
+    ) throws -> [UInt8] {
         var bytes = [UInt8]()
 
         while bytes.count < limit {

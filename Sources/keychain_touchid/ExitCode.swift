@@ -32,6 +32,8 @@ struct Failure: Equatable {
             self.init(code: .authentication, message: "authentication failed: \(error.message)")
         case let error as SettingsError:
             self.init(code: .failure, message: "settings: \(error.message)")
+        case let error as HandoverError:
+            self.init(code: .failure, message: "hand-over: \(error.message)")
         default:
             self.init(code: .failure, message: error.localizedDescription)
         }
@@ -47,7 +49,7 @@ struct Failure: Equatable {
             Failure(
                 code: .usage,
                 message: "the secret is too long to type or paste at the prompt; pipe it instead, "
-                    + "for example: pbpaste | keychain-touchid set <service> <account>"
+                    + "for example: pbpaste | keytap set <service> <account>"
             )
         case let .unreadable(reason):
             Failure(code: .failure, message: "cannot read the secret: \(reason)")
@@ -57,16 +59,18 @@ struct Failure: Equatable {
     private static func describing(_ error: StoreError) -> Failure {
         switch error {
         case .notFound:
-            Failure(code: .notFound, message: "no such item, or it was not created by keychain-touchid")
+            Failure(code: .notFound, message: "no such item, or it was not created by keytap")
         case .duplicateItem:
             Failure(
                 code: .failure,
-                message: "an item with this service and account exists but was not created by keychain-touchid; "
+                message: "an item with this service and account exists but was not created by keytap; "
                     + "remove it first (security delete-generic-password -s <service> -a <account>) "
                     + "or choose another name"
             )
         case .accessDenied:
             Failure(code: .authentication, message: "the Keychain denied access to the item")
+        case .locked:
+            Failure(code: .failure, message: "the keychain is locked; unlock it and try again")
         case let .unexpected(status):
             Failure(code: .failure, message: "Keychain error \(status): \(keychainMessage(for: status))")
         }

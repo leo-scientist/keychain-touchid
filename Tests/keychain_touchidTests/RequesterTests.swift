@@ -74,7 +74,8 @@ import Testing
         let python312 = ProcessSnapshot(executablePath: "/opt/homebrew/bin/python3.12", command: "python3.12")
 
         #expect(Requester.describe(arguments: ["python3.12", "sync.py"], ancestry: [python312]).name == "sync.py")
-        #expect(Requester.describe(arguments: ["Python", "sync.py"], ancestry: [Self.python, Self.zsh]).name == "sync.py")
+        #expect(
+            Requester.describe(arguments: ["Python", "sync.py"], ancestry: [Self.python, Self.zsh]).name == "sync.py")
     }
 
     @Test func processWithoutAPathFallsBackToItsCommandName() {
@@ -99,7 +100,8 @@ import Testing
 
     @Test func outermostApplicationIsTheOrigin() {
         let helper = ProcessSnapshot(
-            executablePath: "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper",
+            executablePath:
+                "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Contents/MacOS/Code Helper",
             command: "Code Helper"
         )
         let editor = ProcessSnapshot(
@@ -107,16 +109,23 @@ import Testing
             command: "Electron"
         )
 
-        #expect(Requester.describe(arguments: ["-zsh"], ancestry: [Self.zsh, helper, editor]).origin
-            == .application("Visual Studio Code"))
-        #expect(Requester.describe(arguments: ["sh", "run.sh"], ancestry: [Self.bash, Self.python, Self.zsh, Self.terminal]).origin
-            == .application("Terminal"))
+        #expect(
+            Requester.describe(arguments: ["-zsh"], ancestry: [Self.zsh, helper, editor]).origin
+                == .application("Visual Studio Code"))
+        #expect(
+            Requester.describe(
+                arguments: ["sh", "run.sh"], ancestry: [Self.bash, Self.python, Self.zsh, Self.terminal]
+            ).origin
+                == .application("Terminal"))
     }
 
     @Test func applicationThatAsksItselfHasNoSeparateOrigin() {
-        let launcher = ProcessSnapshot(executablePath: "/Applications/Launcher.app/Contents/MacOS/Launcher", command: "Launcher")
+        let launcher = ProcessSnapshot(
+            executablePath: "/Applications/Launcher.app/Contents/MacOS/Launcher", command: "Launcher")
 
-        #expect(Requester.describe(arguments: ["Launcher"], ancestry: [launcher]) == Requester(name: "Launcher", origin: nil))
+        #expect(
+            Requester.describe(arguments: ["Launcher"], ancestry: [launcher])
+                == Requester(name: "Launcher", origin: nil))
     }
 
     @Test func withoutAnApplicationTheOutermostProcessIsTheOrigin() {
@@ -153,30 +162,34 @@ import Testing
     @Test func namesTheItemTheRequesterAndTheApplication() {
         let requester = Requester(name: "vault-pass.sh", origin: .application("Terminal"))
 
-        #expect(PromptText.reason(for: item, requester: requester, reuseSeconds: nil)
-            == "give the secret “op-token” (sam) to vault-pass.sh, running in Terminal")
+        #expect(
+            PromptText.reason(for: item, requester: requester, reuseSeconds: nil)
+                == "give the secret “op-token” (sam) to vault-pass.sh, running in Terminal")
     }
 
     @Test func namesTheStartingProcessWhenThereIsNoApplication() {
         let requester = Requester(name: "backup.sh", origin: .process("launchd"))
 
-        #expect(PromptText.reason(for: item, requester: requester, reuseSeconds: nil)
-            == "give the secret “op-token” (sam) to backup.sh, started by launchd")
+        #expect(
+            PromptText.reason(for: item, requester: requester, reuseSeconds: nil)
+                == "give the secret “op-token” (sam) to backup.sh, started by launchd")
     }
 
     @Test func namesOnlyTheRequesterWhenItHasNoOrigin() {
         let requester = Requester(name: "Launcher", origin: nil)
 
-        #expect(PromptText.reason(for: item, requester: requester, reuseSeconds: nil)
-            == "give the secret “op-token” (sam) to Launcher")
+        #expect(
+            PromptText.reason(for: item, requester: requester, reuseSeconds: nil)
+                == "give the secret “op-token” (sam) to Launcher")
     }
 
     @Test func saysHowLongTheAuthenticationWillBeReused() {
         let requester = Requester(name: "zsh", origin: .application("Terminal"))
 
-        #expect(PromptText.reason(for: item, requester: requester, reuseSeconds: 300)
-            == "give the secret “op-token” (sam) to zsh, running in Terminal, "
-            + "and to let this terminal read it again for 5 minutes without asking")
+        #expect(
+            PromptText.reason(for: item, requester: requester, reuseSeconds: 300)
+                == "give the secret “op-token” (sam) to zsh, running in Terminal, "
+                + "and to let this terminal read it again for 5 minutes without asking")
     }
 
     @Test(arguments: [

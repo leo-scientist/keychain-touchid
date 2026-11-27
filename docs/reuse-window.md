@@ -97,9 +97,11 @@ passes.
 
 ## Why it is built this way
 
-Any process running as the user can overwrite or delete a Keychain item without
-a password ([keychain.md](keychain.md#the-trust-list)). That rules out the
-simpler designs:
+Any process running as the user can change or remove a Keychain item without a
+password ([keychain.md](keychain.md#what-another-program-can-do)). On the login
+keychain an item changed by another program can no longer be read silently,
+which would already expose a forged record; the design does not rely on that,
+and rules out the simpler ones:
 
 | Design | Why not |
 | --- | --- |
